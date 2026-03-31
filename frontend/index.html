@@ -1,11 +1,1052 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonetaKngdm</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MonetaKngdm</title>
+  <style>
+    :root {
+      --bg-dark: #04111f;
+      --bg-mid: #0b2340;
+      --bg-soft: #123a68;
+      --panel: rgba(12, 33, 58, 0.78);
+      --panel-strong: rgba(10, 27, 48, 0.9);
+      --panel-border: rgba(160, 210, 255, 0.18);
+      --text-main: #f3f9ff;
+      --text-soft: #b8d7f5;
+      --text-muted: #81a9cb;
+      --accent: #4db6ff;
+      --accent-strong: #7fd0ff;
+      --positive: #59f0b0;
+      --negative: #ff7d9c;
+      --warning: #ffd166;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --content-width: 1240px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at top left, rgba(77, 182, 255, 0.2), transparent 30%),
+        radial-gradient(circle at 85% 15%, rgba(96, 165, 250, 0.24), transparent 24%),
+        linear-gradient(145deg, var(--bg-dark), var(--bg-mid) 52%, var(--bg-soft));
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 260px;
+      height: 260px;
+      top: 8%;
+      left: -80px;
+      background: rgba(56, 189, 248, 0.18);
+    }
+
+    body::after {
+      width: 320px;
+      height: 320px;
+      right: -120px;
+      bottom: 8%;
+      background: rgba(59, 130, 246, 0.18);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(var(--content-width), calc(100% - 32px));
+      margin: 24px auto;
+      padding: 36px;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.03em;
+    }
+
+    .section-copy {
+      margin: 8px 0 0;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.9rem;
+    }
+
+    .brand-mark {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #d2f0ff);
+      box-shadow: 0 0 22px rgba(77, 182, 255, 0.35);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 229, 255, 0.18);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 12px 18px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .button-primary {
+      color: #02111f;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 14px 30px rgba(77, 182, 255, 0.22);
+    }
+
+    .button-secondary {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(191, 229, 255, 0.18);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.9fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .hero-card,
+    .panel-card {
+      border: 1px solid rgba(191, 229, 255, 0.12);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+    }
+
+    .hero-card {
+      padding: 32px;
+    }
+
+    .hero-card h1 {
+      margin: 0 0 18px;
+      font-size: clamp(3rem, 7vw, 5.8rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      text-shadow: 0 0 30px rgba(77, 182, 255, 0.15);
+    }
+
+    .headline {
+      background: linear-gradient(180deg, #ffffff 0%, #d8efff 55%, #89cfff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 700px;
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 1.06rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .mini-stat {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(5, 18, 34, 0.32);
+      border: 1px solid rgba(191, 229, 255, 0.1);
+    }
+
+    .mini-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .mini-value {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .mini-change {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.92rem;
+      color: var(--text-soft);
+    }
+
+    .positive {
+      color: var(--positive);
+    }
+
+    .negative {
+      color: var(--negative);
+    }
+
+    .watchlist-card {
+      padding: 24px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .panel-tag {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+    }
+
+    .watchlist {
+      display: grid;
+      gap: 12px;
+    }
+
+    .watchlist-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(5, 18, 34, 0.34);
+      border: 1px solid rgba(191, 229, 255, 0.08);
+    }
+
+    .ticker-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(77, 182, 255, 0.28), rgba(255, 255, 255, 0.06));
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .ticker-name {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .ticker-meta {
+      margin: 4px 0 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .ticker-price {
+      text-align: right;
+    }
+
+    .ticker-price strong {
+      display: block;
+      font-size: 1.05rem;
+    }
+
+    .ticker-price span {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      gap: 24px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 24px;
+    }
+
+    .panel-card {
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 229, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    .filter-chip.active {
+      color: #02111f;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border-color: transparent;
+    }
+
+    .market-table {
+      display: grid;
+      gap: 12px;
+    }
+
+    .market-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(70px, 0.5fr));
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(5, 18, 34, 0.34);
+      border: 1px solid rgba(191, 229, 255, 0.08);
+    }
+
+    .market-row.header {
+      padding-top: 0;
+      padding-bottom: 0;
+      background: transparent;
+      border: 0;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .asset {
+      min-width: 0;
+    }
+
+    .asset strong,
+    .asset span {
+      display: block;
+    }
+
+    .asset span {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .cell {
+      text-align: right;
+      font-size: 0.96rem;
+      color: var(--text-soft);
+    }
+
+    .cell strong {
+      color: var(--text-main);
+    }
+
+    .news-list,
+    .movers-list,
+    .alerts-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .news-item,
+    .mover-item,
+    .alert-item {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(5, 18, 34, 0.34);
+      border: 1px solid rgba(191, 229, 255, 0.08);
+    }
+
+    .news-item h3,
+    .mover-item h3,
+    .alert-item h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .news-item p,
+    .mover-item p,
+    .alert-item p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .meta-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      flex-wrap: wrap;
+    }
+
+    .sidebar-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .placeholder-note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 209, 102, 0.08);
+      border: 1px solid rgba(255, 209, 102, 0.14);
+      color: #ffe7a3;
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .watchlist-card {
+        padding-top: 24px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        width: min(var(--content-width), calc(100% - 24px));
+        padding: 26px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-card {
+        padding: 26px;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .market-row {
+        grid-template-columns: minmax(0, 1fr) repeat(2, minmax(80px, 1fr));
+      }
+
+      .market-row .hide-tablet {
+        display: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(var(--content-width), calc(100% - 16px));
+        margin: 12px auto;
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .topbar {
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+
+      .topbar-actions,
+      .hero-actions,
+      .toolbar,
+      .toolbar-group {
+        width: 100%;
+      }
+
+      .hero-card,
+      .panel-card,
+      .watchlist-card {
+        padding: 18px;
+      }
+
+      .hero-card h1 {
+        font-size: clamp(2.5rem, 14vw, 3.8rem);
+      }
+
+      .hero-copy,
+      .section-copy {
+        font-size: 0.98rem;
+        line-height: 1.6;
+      }
+
+      .pill,
+      .button,
+      .filter-chip {
+        width: 100%;
+      }
+
+      .watchlist-item {
+        grid-template-columns: auto 1fr;
+      }
+
+      .ticker-price {
+        grid-column: 1 / -1;
+        text-align: left;
+        padding-left: 58px;
+      }
+
+      .market-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .market-row.header {
+        display: none;
+      }
+
+      .market-row .cell {
+        text-align: left;
+      }
+
+      .market-row .hide-mobile {
+        display: none;
+      }
+    }
+
+    @media (max-width: 449px) {
+      .page {
+        padding: 16px;
+        border-radius: 22px;
+      }
+
+      .brand {
+        gap: 10px;
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+      }
+
+      .topbar-actions {
+        gap: 10px;
+      }
+
+      .hero {
+        gap: 18px;
+      }
+
+      .hero-card,
+      .panel-card,
+      .watchlist-card {
+        padding: 16px;
+        border-radius: 18px;
+      }
+
+      .hero-card h1 {
+        margin-bottom: 14px;
+        font-size: clamp(2.15rem, 12vw, 3rem);
+      }
+
+      .hero-copy,
+      .section-copy,
+      .news-item p,
+      .mover-item p,
+      .alert-item p,
+      .placeholder-note {
+        font-size: 0.94rem;
+        line-height: 1.55;
+      }
+
+      .hero-actions {
+        margin-top: 20px;
+        gap: 10px;
+      }
+
+      .hero-stats {
+        margin-top: 18px;
+        gap: 8px;
+      }
+
+      .mini-stat,
+      .news-item,
+      .mover-item,
+      .alert-item,
+      .market-row {
+        padding: 12px;
+      }
+
+      .mini-value {
+        font-size: 1.1rem;
+      }
+
+      .mini-change,
+      .ticker-meta,
+      .ticker-price span,
+      .cell,
+      .filter-chip,
+      .pill {
+        font-size: 0.84rem;
+      }
+
+      .panel-head,
+      .toolbar {
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .panel-head {
+        flex-direction: column;
+      }
+
+      .toolbar-group {
+        gap: 8px;
+      }
+
+      .watchlist {
+        gap: 10px;
+      }
+
+      .watchlist-item {
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .ticker-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+      }
+
+      .ticker-name {
+        font-size: 0.9rem;
+      }
+
+      .ticker-price {
+        padding-left: 46px;
+      }
+
+      .ticker-price strong {
+        font-size: 0.92rem;
+      }
+
+      .market-table,
+      .news-list,
+      .movers-list,
+      .alerts-list,
+      .sidebar-grid,
+      .stack {
+        gap: 10px;
+      }
+
+      .market-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .asset span {
+        font-size: 0.82rem;
+      }
+
+      .market-row .cell {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .market-row .cell::before {
+        color: var(--text-muted);
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .market-row .cell:nth-child(2)::before {
+        content: "Kurs";
+      }
+
+      .market-row .cell:nth-child(3)::before {
+        content: "1 Tag";
+      }
+
+      .market-row .cell:nth-child(4)::before {
+        content: "Volumen";
+      }
+
+      .meta-line {
+        gap: 6px;
+        font-size: 0.76rem;
+      }
+
+      .button {
+        min-height: 40px;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+
+      .section-title,
+      .news-item h3,
+      .mover-item h3,
+      .alert-item h3 {
+        font-size: 0.96rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <span>MonetaKngdm By Louis Zekaj</span>
+      </div>
+
+      <div class="topbar-actions">
+        <span class="pill">Live Aktienkurse</span>
+        <a class="button button-secondary" href="#">Watchlist bearbeiten</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <article class="hero-card">
+        <h1><span class="headline">MonetaKngdm</span></h1>
+        <p class="hero-copy">
+          Deine Übersicht für Aktien, Indizes, Marktbewegungen und wichtige Börsen-News.
+           Verfolge Kursentwicklungen in Echtzeit, behalte wichtige Werte im Blick und starte mit einer klaren, modernen Übersicht in den Handelstag.
+        </p>
+
+        <div class="hero-actions">
+          <a class="button button-primary" href="#">Maerkte oeffnen</a>
+          <a class="button button-secondary" href="#">News ansehen</a>
+        </div>
+
+        <div class="hero-stats">
+          <article class="mini-stat">
+            <span class="mini-label">DAX</span>
+            <strong class="mini-value">18.742,31</strong>
+            <span class="mini-change positive">+1,26 % heute</span>
+          </article>
+
+          <article class="mini-stat">
+            <span class="mini-label">NASDAQ 100</span>
+            <strong class="mini-value">20.884,94</strong>
+            <span class="mini-change positive">+0,84 % heute</span>
+          </article>
+
+          <article class="mini-stat">
+            <span class="mini-label">Watchlist</span>
+            <strong class="mini-value">12 Werte</strong>
+            <span class="mini-change">3 mit starkem Momentum</span>
+          </article>
+        </div>
+      </article>
+
+      <aside class="watchlist-card hero-card">
+        <div class="panel-head">
+          <div>
+            <div class="panel-tag">Schnellzugriff</div>
+            <h2 class="section-title">Watchlist</h2>
+          </div>
+          <span class="pill">Heute aktiv</span>
+        </div>
+
+        <div class="watchlist">
+          <article class="watchlist-item">
+            <div class="ticker-icon">AP</div>
+            <div>
+              <h3 class="ticker-name">Apple</h3>
+              <p class="ticker-meta">AAPL · Technologie</p>
+            </div>
+            <div class="ticker-price">
+              <strong>212,48 $</strong>
+              <span class="positive">+2,14 %</span>
+            </div>
+          </article>
+
+          <article class="watchlist-item">
+            <div class="ticker-icon">NV</div>
+            <div>
+              <h3 class="ticker-name">NVIDIA</h3>
+              <p class="ticker-meta">NVDA · Halbleiter</p>
+            </div>
+            <div class="ticker-price">
+              <strong>924,37 $</strong>
+              <span class="positive">+3,62 %</span>
+            </div>
+          </article>
+
+          <article class="watchlist-item">
+            <div class="ticker-icon">TS</div>
+            <div>
+              <h3 class="ticker-name">Tesla</h3>
+              <p class="ticker-meta">TSLA · Automobil</p>
+            </div>
+            <div class="ticker-price">
+              <strong>168,92 $</strong>
+              <span class="negative">-1,08 %</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="placeholder-note">
+          Du kannst spaeter einfach weitere `watchlist-item`-Bloecke kopieren, um neue Aktien
+          hinzuzufuegen oder bestehende Werte zu aendern.
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout-grid">
+      <div class="stack">
+        <article class="panel-card">
+          <div class="toolbar">
+            <div>
+              <h2 class="section-title">Marktuebersicht</h2>
+              <p class="section-copy">Kompakte Tabelle fuer Aktienkurse, Tagesveraenderungen und Volumen.</p>
+            </div>
+
+            <div class="toolbar-group">
+              <span class="filter-chip active">Top Aktien</span>
+              <span class="filter-chip">Indizes</span>
+              <span class="filter-chip">ETFs</span>
+            </div>
+          </div>
+
+          <div class="market-table">
+            <div class="market-row header">
+              <div>Wert</div>
+              <div class="cell">Kurs</div>
+              <div class="cell">1 Tag</div>
+              <div class="cell hide-mobile">Volumen</div>
+              <div class="cell hide-tablet hide-mobile">Marktkap.</div>
+            </div>
+
+            <div class="market-row">
+              <div class="asset">
+                <strong>Microsoft</strong>
+                <span>MSFT · Software</span>
+              </div>
+              <div class="cell"><strong>428,17 $</strong></div>
+              <div class="cell positive">+1,12 %</div>
+              <div class="cell hide-mobile">24,1 Mio.</div>
+              <div class="cell hide-tablet hide-mobile">3,18 Bio.</div>
+            </div>
+
+            <div class="market-row">
+              <div class="asset">
+                <strong>Amazon</strong>
+                <span>AMZN · E-Commerce</span>
+              </div>
+              <div class="cell"><strong>186,44 $</strong></div>
+              <div class="cell positive">+0,78 %</div>
+              <div class="cell hide-mobile">31,8 Mio.</div>
+              <div class="cell hide-tablet hide-mobile">1,94 Bio.</div>
+            </div>
+
+            <div class="market-row">
+              <div class="asset">
+                <strong>ASML</strong>
+                <span>ASML · Halbleiter</span>
+              </div>
+              <div class="cell"><strong>944,10 $</strong></div>
+              <div class="cell negative">-0,42 %</div>
+              <div class="cell hide-mobile">1,2 Mio.</div>
+              <div class="cell hide-tablet hide-mobile">368 Mrd.</div>
+            </div>
+
+            <div class="market-row">
+              <div class="asset">
+                <strong>Siemens Energy</strong>
+                <span>ENR · Industrie</span>
+              </div>
+              <div class="cell"><strong>22,61 EUR</strong></div>
+              <div class="cell positive">+2,98 %</div>
+              <div class="cell hide-mobile">4,7 Mio.</div>
+              <div class="cell hide-tablet hide-mobile">18 Mrd.</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <div class="panel-tag">Heute wichtig</div>
+              <h2 class="section-title">Marktnews</h2>
+            </div>
+            <a class="button button-secondary" href="#">Alle News</a>
+          </div>
+
+          <div class="news-list">
+            <article class="news-item">
+              <h3>Tech-Aktien fuehren den Markt an</h3>
+              <p>Starke Unternehmenszahlen und positive Analystenkommentare treiben grosse Technologie-Werte an.</p>
+              <div class="meta-line">
+                <span>Vor 12 Minuten</span>
+                <span>Technologie</span>
+              </div>
+            </article>
+
+            <article class="news-item">
+              <h3>DAX behauptet Tagesgewinne</h3>
+              <p>Der deutsche Leitindex bleibt im Plus, getragen von Industrie- und Energieunternehmen.</p>
+              <div class="meta-line">
+                <span>Vor 27 Minuten</span>
+                <span>Europa</span>
+              </div>
+            </article>
+
+            <article class="news-item">
+              <h3>US-Markt wartet auf Konjunkturdaten</h3>
+              <p>Anleger richten den Blick auf kommende Wirtschaftsdaten und moegliche Auswirkungen auf Zinserwartungen.</p>
+              <div class="meta-line">
+                <span>Vor 41 Minuten</span>
+                <span>Makro</span>
+              </div>
+            </article>
+          </div>
+        </article>
+      </div>
+
+      <aside class="sidebar-grid">
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <div class="panel-tag">Momentum</div>
+              <h2 class="section-title">Top Beweger</h2>
+            </div>
+          </div>
+
+          <div class="movers-list">
+            <article class="mover-item">
+              <h3 class="positive">NVIDIA +3,62 %</h3>
+              <p>Starke Nachfrage nach KI-Hardware sorgt fuer weiteres Kaufinteresse.</p>
+            </article>
+
+            <article class="mover-item">
+              <h3 class="positive">Siemens Energy +2,98 %</h3>
+              <p>Energie- und Infrastrukturwerte entwickeln sich ueberdurchschnittlich.</p>
+            </article>
+
+            <article class="mover-item">
+              <h3 class="negative">Tesla -1,08 %</h3>
+              <p>Nach vorherigen Gewinnen setzen kurzfristige Gewinnmitnahmen ein.</p>
+            </article>
+          </div>
+        </article>
+
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <div class="panel-tag">Benachrichtigungen</div>
+              <h2 class="section-title">Aktienwecker</h2>
+            </div>
+            <span class="pill">3 aktiv</span>
+          </div>
+
+          <div class="alerts-list">
+            <article class="alert-item">
+              <h3>Apple ueber 215,00 $</h3>
+              <p>Wird ausgeloest, sobald der Zielkurs im Tagesverlauf erreicht wird.</p>
+            </article>
+
+            <article class="alert-item">
+              <h3>ASML unter 930,00 $</h3>
+              <p>Hilft dir, moegliche Ruecksetzer fuer neue Einstiege frueh zu erkennen.</p>
+            </article>
+
+            <article class="alert-item">
+              <h3>DAX bei 18.800 Punkten</h3>
+              <p>Ideal, wenn du auf Breakouts oder wichtige Widerstandsmarken achtest.</p>
+            </article>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
 </body>
 </html>
