@@ -44,6 +44,10 @@
       overflow-x: hidden;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body::before,
     body::after {
       content: "";
@@ -150,6 +154,8 @@
       border-radius: 14px;
       text-decoration: none;
       font-weight: 600;
+      font: inherit;
+      cursor: pointer;
       transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
     }
 
@@ -216,6 +222,19 @@
       gap: 14px;
       flex-wrap: wrap;
       margin-top: 28px;
+    }
+
+    .search-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .search-results {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     .hero-stats {
@@ -372,6 +391,8 @@
       background: rgba(255, 255, 255, 0.04);
       color: var(--text-soft);
       font-size: 0.9rem;
+      font: inherit;
+      cursor: pointer;
     }
 
     .filter-chip.active {
@@ -394,6 +415,10 @@
       border-radius: var(--radius-md);
       background: rgba(5, 18, 34, 0.34);
       border: 1px solid rgba(191, 229, 255, 0.08);
+    }
+
+    .market-row:not(.header) {
+      cursor: pointer;
     }
 
     .market-row.header {
@@ -491,6 +516,108 @@
       font-size: 0.92rem;
     }
 
+    .form-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 12px;
+      border: 1px solid rgba(191, 229, 255, 0.16);
+      border-radius: 12px;
+      background: rgba(5, 18, 34, 0.44);
+      color: var(--text-main);
+      font: inherit;
+    }
+
+    .input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .select {
+      color-scheme: dark;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .small-button {
+      min-height: 34px;
+      padding: 8px 10px;
+      border: 1px solid rgba(191, 229, 255, 0.16);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+
+    .status-note {
+      margin: 14px 0 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .source-badge {
+      border-color: rgba(255, 209, 102, 0.2);
+      color: #ffe7a3;
+    }
+
+    .remove-button {
+      color: var(--negative);
+    }
+
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .chart-ranges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chart-area {
+      min-height: 280px;
+      border-radius: var(--radius-md);
+      background: rgba(5, 18, 34, 0.34);
+      border: 1px solid rgba(191, 229, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .chart-svg {
+      display: block;
+      width: 100%;
+      height: 280px;
+    }
+
+    .chart-empty {
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
     @media (max-width: 1100px) {
       .hero,
       .layout-grid {
@@ -545,9 +672,18 @@
 
       .topbar-actions,
       .hero-actions,
+      .search-form,
       .toolbar,
       .toolbar-group {
         width: 100%;
+      }
+
+      .search-form {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
       }
 
       .hero-card,
@@ -788,8 +924,8 @@
       </div>
 
       <div class="topbar-actions">
-        <span class="pill">Live Aktienkurse</span>
-        <a class="button button-secondary" href="#">Watchlist bearbeiten</a>
+        <span class="pill source-badge" id="api-status">Pruefe API...</span>
+        <a class="button button-secondary" href="#watchlist-form">Watchlist bearbeiten</a>
       </div>
     </header>
 
@@ -801,9 +937,17 @@
            Verfolge Kursentwicklungen in Echtzeit, behalte wichtige Werte im Blick und starte mit einer klaren, modernen Übersicht in den Handelstag.
         </p>
 
+        <form class="search-form" id="search-form">
+          <input class="input" id="search-input" name="search" placeholder="Aktie suchen, z.B. Apple oder AAPL" autocomplete="off">
+          <button class="button button-primary" type="submit">Suchen</button>
+          <button class="button button-secondary" id="clear-search" type="button">Zuruecksetzen</button>
+        </form>
+
+        <div class="search-results" id="search-results"></div>
+
         <div class="hero-actions">
-          <a class="button button-primary" href="#">Maerkte oeffnen</a>
-          <a class="button button-secondary" href="#">News ansehen</a>
+          <a class="button button-primary" href="#markets">Maerkte oeffnen</a>
+          <a class="button button-secondary" href="#news">News ansehen</a>
         </div>
 
         <div class="hero-stats">
@@ -821,8 +965,8 @@
 
           <article class="mini-stat">
             <span class="mini-label">Watchlist</span>
-            <strong class="mini-value">12 Werte</strong>
-            <span class="mini-change">3 mit starkem Momentum</span>
+            <strong class="mini-value" id="watchlist-stat-value">0 Werte</strong>
+            <span class="mini-change" id="watchlist-stat-change">Wird geladen</span>
           </article>
         </div>
       </article>
@@ -833,11 +977,11 @@
             <div class="panel-tag">Schnellzugriff</div>
             <h2 class="section-title">Watchlist</h2>
           </div>
-          <span class="pill">Heute aktiv</span>
+          <span class="pill" id="watchlist-count">Wird geladen</span>
         </div>
 
-        <div class="watchlist">
-          <article class="watchlist-item">
+        <div class="watchlist" id="watchlist">
+          <article class="watchlist-item" data-symbol="AAPL">
             <div class="ticker-icon">AP</div>
             <div>
               <h3 class="ticker-name">Apple</h3>
@@ -849,7 +993,7 @@
             </div>
           </article>
 
-          <article class="watchlist-item">
+          <article class="watchlist-item" data-symbol="NVDA">
             <div class="ticker-icon">NV</div>
             <div>
               <h3 class="ticker-name">NVIDIA</h3>
@@ -861,7 +1005,7 @@
             </div>
           </article>
 
-          <article class="watchlist-item">
+          <article class="watchlist-item" data-symbol="TSLA">
             <div class="ticker-icon">TS</div>
             <div>
               <h3 class="ticker-name">Tesla</h3>
@@ -878,12 +1022,22 @@
           Du kannst spaeter einfach weitere `watchlist-item`-Bloecke kopieren, um neue Aktien
           hinzuzufuegen oder bestehende Werte zu aendern.
         </div>
+
+        <form class="form-grid" id="watchlist-form">
+          <div class="form-row">
+            <input class="input" id="watch-symbol" name="symbol" placeholder="Symbol, z.B. AAPL" autocomplete="off" required>
+            <input class="input" id="watch-name" name="name" placeholder="Name, z.B. Apple" autocomplete="off">
+          </div>
+          <button class="button button-primary" type="submit">Zur Watchlist hinzufuegen</button>
+        </form>
+
+        <p class="status-note" id="watchlist-status">Eigene Eintraege werden im Backend gespeichert.</p>
       </aside>
     </section>
 
     <section class="layout-grid">
       <div class="stack">
-        <article class="panel-card">
+        <article class="panel-card" id="markets">
           <div class="toolbar">
             <div>
               <h2 class="section-title">Marktuebersicht</h2>
@@ -891,13 +1045,13 @@
             </div>
 
             <div class="toolbar-group">
-              <span class="filter-chip active">Top Aktien</span>
-              <span class="filter-chip">Indizes</span>
-              <span class="filter-chip">ETFs</span>
+              <button class="filter-chip active" type="button" data-market-filter="stocks">Top Aktien</button>
+              <button class="filter-chip" type="button" data-market-filter="indices">Indizes</button>
+              <button class="filter-chip" type="button" data-market-filter="etfs">ETFs</button>
             </div>
           </div>
 
-          <div class="market-table">
+          <div class="market-table" id="market-table">
             <div class="market-row header">
               <div>Wert</div>
               <div class="cell">Kurs</div>
@@ -906,7 +1060,7 @@
               <div class="cell hide-tablet hide-mobile">Marktkap.</div>
             </div>
 
-            <div class="market-row">
+            <div class="market-row" data-symbol="MSFT">
               <div class="asset">
                 <strong>Microsoft</strong>
                 <span>MSFT · Software</span>
@@ -917,7 +1071,7 @@
               <div class="cell hide-tablet hide-mobile">3,18 Bio.</div>
             </div>
 
-            <div class="market-row">
+            <div class="market-row" data-symbol="AMZN">
               <div class="asset">
                 <strong>Amazon</strong>
                 <span>AMZN · E-Commerce</span>
@@ -928,7 +1082,7 @@
               <div class="cell hide-tablet hide-mobile">1,94 Bio.</div>
             </div>
 
-            <div class="market-row">
+            <div class="market-row" data-symbol="ASML">
               <div class="asset">
                 <strong>ASML</strong>
                 <span>ASML · Halbleiter</span>
@@ -939,7 +1093,7 @@
               <div class="cell hide-tablet hide-mobile">368 Mrd.</div>
             </div>
 
-            <div class="market-row">
+            <div class="market-row" data-symbol="ENR.DEX">
               <div class="asset">
                 <strong>Siemens Energy</strong>
                 <span>ENR · Industrie</span>
@@ -952,13 +1106,32 @@
           </div>
         </article>
 
-        <article class="panel-card">
+        <article class="panel-card" id="chart-panel">
+          <div class="chart-toolbar">
+            <div>
+              <div class="panel-tag">Kursverlauf</div>
+              <h2 class="section-title" id="chart-title">Chart wird geladen</h2>
+            </div>
+            <div class="chart-ranges">
+              <button class="filter-chip" type="button" data-chart-range="1mo">1M</button>
+              <button class="filter-chip active" type="button" data-chart-range="3mo">3M</button>
+              <button class="filter-chip" type="button" data-chart-range="6mo">6M</button>
+              <button class="filter-chip" type="button" data-chart-range="1y">1J</button>
+            </div>
+          </div>
+          <div class="chart-area" id="chart-area">
+            <div class="chart-empty">Chart wird geladen...</div>
+          </div>
+          <p class="status-note" id="chart-status">Klicke auf einen Marktwert, einen Watchlist-Eintrag oder ein Suchergebnis, um den Chart zu wechseln.</p>
+        </article>
+
+        <article class="panel-card" id="news">
           <div class="panel-head">
             <div>
               <div class="panel-tag">Heute wichtig</div>
               <h2 class="section-title">Marktnews</h2>
             </div>
-            <a class="button button-secondary" href="#">Alle News</a>
+            <button class="button button-secondary" id="refresh-news" type="button">Alle News neu laden</button>
           </div>
 
           <div class="news-list">
@@ -1025,10 +1198,10 @@
               <div class="panel-tag">Benachrichtigungen</div>
               <h2 class="section-title">Aktienwecker</h2>
             </div>
-            <span class="pill">3 aktiv</span>
+            <span class="pill" id="alerts-count">0 aktiv</span>
           </div>
 
-          <div class="alerts-list">
+          <div class="alerts-list" id="alerts-list">
             <article class="alert-item">
               <h3>Apple ueber 215,00 $</h3>
               <p>Wird ausgeloest, sobald der Zielkurs im Tagesverlauf erreicht wird.</p>
@@ -1044,9 +1217,723 @@
               <p>Ideal, wenn du auf Breakouts oder wichtige Widerstandsmarken achtest.</p>
             </article>
           </div>
+
+          <form class="form-grid" id="alert-form">
+            <div class="form-row">
+              <input class="input" id="alert-symbol" name="symbol" placeholder="Symbol, z.B. AAPL" autocomplete="off" required>
+              <input class="input" id="alert-target" name="target" placeholder="Zielkurs, z.B. 215" inputmode="decimal" required>
+            </div>
+            <select class="select" id="alert-direction" name="direction">
+              <option value="above">Benachrichtigen, wenn Kurs hoeher ist</option>
+              <option value="below">Benachrichtigen, wenn Kurs niedriger ist</option>
+            </select>
+            <button class="button button-primary" type="submit">Aktienwecker erstellen</button>
+            <button class="button button-secondary" id="notification-button" type="button">Benachrichtigungen erlauben</button>
+          </form>
+
+          <p class="status-note" id="alert-status">Der Aktienwecker prueft Kurse, solange diese Seite im Browser offen ist.</p>
         </article>
       </aside>
     </section>
   </main>
+
+  <script>
+    const symbols = ["AAPL", "NVDA", "TSLA", "MSFT", "AMZN", "ASML", "ENR.DEX"];
+
+    // Die neue App-Logik steht im naechsten Script-Block.
+
+    async function loadQuotes() {
+      try {
+        const response = await fetch(`/api/quotes?symbols=${symbols.join(",")}`);
+        const data = await response.json();
+        const quotes = new Map(data.quotes.map((quote) => [quote.symbol, quote]));
+
+        document.querySelectorAll("[data-symbol]").forEach((element) => {
+          const quote = quotes.get(element.dataset.symbol);
+          if (!quote) return;
+
+          const price = element.querySelector(".ticker-price strong, .cell strong");
+          const change = element.querySelector(".ticker-price span, .cell.positive, .cell.negative");
+          const meta = element.querySelector(".ticker-meta, .asset span");
+          const volume = element.querySelector(".hide-mobile");
+
+          if (price) price.textContent = formatPrice(quote);
+          if (change) {
+            change.textContent = `${quote.changePercent >= 0 ? "+" : ""}${formatNumber(quote.changePercent)} %`;
+            change.classList.toggle("positive", quote.changePercent >= 0);
+            change.classList.toggle("negative", quote.changePercent < 0);
+          }
+          if (meta) meta.textContent = `${quote.symbol} · ${quote.sector}`;
+          if (volume) volume.textContent = quote.volume;
+        });
+      } catch (error) {
+        console.warn("Kurse konnten nicht geladen werden.", error);
+      }
+    }
+
+    async function loadNews() {
+      try {
+        const response = await fetch("/api/news");
+        const data = await response.json();
+        const newsList = document.querySelector(".news-list");
+        if (!newsList || !Array.isArray(data.news)) return;
+
+        newsList.innerHTML = data.news.map((item) => `
+          <article class="news-item">
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.summary)}</p>
+            <div class="meta-line">
+              <span>${escapeHtml(item.time)}</span>
+              <span>${escapeHtml(item.category)}</span>
+            </div>
+          </article>
+        `).join("");
+      } catch (error) {
+        console.warn("News konnten nicht geladen werden.", error);
+      }
+    }
+
+    function formatPrice(quote) {
+      const price = formatNumber(quote.price);
+      return quote.currency === "EUR" ? `${price} EUR` : `${price} $`;
+    }
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString("de-DE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+  <script>
+    (() => {
+      const marketSets = {
+        stocks: [
+          { symbol: "MSFT", name: "Microsoft", sector: "Software", marketCap: "3,18 Bio." },
+          { symbol: "AMZN", name: "Amazon", sector: "E-Commerce", marketCap: "1,94 Bio." },
+          { symbol: "ASML", name: "ASML", sector: "Halbleiter", marketCap: "368 Mrd." },
+          { symbol: "ENR.DEX", name: "Siemens Energy", sector: "Industrie", marketCap: "18 Mrd." }
+        ],
+        indices: [
+          { symbol: "SPY", name: "S&P 500", sector: "Indexfonds", marketCap: "-" },
+          { symbol: "QQQ", name: "NASDAQ 100", sector: "Indexfonds", marketCap: "-" },
+          { symbol: "DIA", name: "Dow Jones", sector: "Indexfonds", marketCap: "-" },
+          { symbol: "IWM", name: "Russell 2000", sector: "Indexfonds", marketCap: "-" }
+        ],
+        etfs: [
+          { symbol: "VOO", name: "Vanguard S&P 500 ETF", sector: "ETF", marketCap: "-" },
+          { symbol: "EWG", name: "iShares Germany ETF", sector: "ETF", marketCap: "-" },
+          { symbol: "GLD", name: "Gold ETF", sector: "ETF", marketCap: "-" },
+          { symbol: "QQQ", name: "Invesco QQQ ETF", sector: "ETF", marketCap: "-" }
+        ]
+      };
+
+      let activeMarketFilter = "stocks";
+      let currentSearchSymbol = "";
+      let activeChartSymbol = "AAPL";
+      let activeChartRange = "3mo";
+      let appState = { watchlist: [], alerts: [] };
+      let latestQuotes = new Map();
+
+      const apiStatus = document.querySelector("#api-status");
+      const watchlistStatValue = document.querySelector("#watchlist-stat-value");
+      const watchlistStatChange = document.querySelector("#watchlist-stat-change");
+      const watchlistCount = document.querySelector("#watchlist-count");
+      const searchForm = document.querySelector("#search-form");
+      const searchInput = document.querySelector("#search-input");
+      const searchResults = document.querySelector("#search-results");
+      const clearSearch = document.querySelector("#clear-search");
+      const watchlist = document.querySelector("#watchlist");
+      const watchlistForm = document.querySelector("#watchlist-form");
+      const watchlistStatus = document.querySelector("#watchlist-status");
+      const marketTable = document.querySelector("#market-table");
+      const filterButtons = document.querySelectorAll("[data-market-filter]");
+      const refreshNewsButton = document.querySelector("#refresh-news");
+      const chartTitle = document.querySelector("#chart-title");
+      const chartArea = document.querySelector("#chart-area");
+      const chartStatus = document.querySelector("#chart-status");
+      const chartRangeButtons = document.querySelectorAll("[data-chart-range]");
+      const alertsList = document.querySelector("#alerts-list");
+      const alertsCount = document.querySelector("#alerts-count");
+      const alertForm = document.querySelector("#alert-form");
+      const alertStatus = document.querySelector("#alert-status");
+      const notificationButton = document.querySelector("#notification-button");
+
+      initApp();
+
+      async function initApp() {
+        bindForms();
+        await loadState();
+        await refreshQuotes();
+        await loadChart();
+        await loadNewsFromBackend();
+        setInterval(refreshQuotes, 60000);
+      }
+
+      function bindForms() {
+        searchForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const query = searchInput.value.trim();
+          if (!query) return;
+
+          currentSearchSymbol = findSearchSymbol(query);
+          await refreshQuotes();
+          renderSearchResult(currentSearchSymbol);
+        });
+
+        clearSearch?.addEventListener("click", () => {
+          currentSearchSymbol = "";
+          searchInput.value = "";
+          searchResults.innerHTML = "";
+          renderWatchlist();
+          renderMarketRows();
+        });
+
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", async () => {
+            activeMarketFilter = button.dataset.marketFilter;
+            activeChartSymbol = currentMarketAssets()[0]?.symbol || activeChartSymbol;
+            filterButtons.forEach((item) => item.classList.toggle("active", item === button));
+            renderMarketRows();
+            document.querySelector("#markets")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            await refreshQuotes();
+            await loadChart();
+          });
+        });
+
+        chartRangeButtons.forEach((button) => {
+          button.addEventListener("click", async () => {
+            activeChartRange = button.dataset.chartRange;
+            chartRangeButtons.forEach((item) => item.classList.toggle("active", item === button));
+            await loadChart();
+          });
+        });
+
+        refreshNewsButton?.addEventListener("click", async () => {
+          refreshNewsButton.textContent = "News werden geladen...";
+          await loadNewsFromBackend();
+          refreshNewsButton.textContent = "Alle News neu laden";
+        });
+
+        watchlistForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const form = new FormData(watchlistForm);
+          const symbol = String(form.get("symbol") || "").trim().toUpperCase();
+          const name = String(form.get("name") || "").trim();
+          if (!symbol) return;
+
+          try {
+            await addToWatchlist(symbol, name);
+            watchlistForm.reset();
+            watchlistStatus.textContent = `${symbol} wurde zur Watchlist hinzugefuegt.`;
+          } catch (error) {
+            watchlistStatus.textContent = error.message;
+          }
+        });
+
+        alertForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const form = new FormData(alertForm);
+          const symbol = String(form.get("symbol") || "").trim().toUpperCase();
+          const target = Number(String(form.get("target") || "").replace(",", "."));
+          const direction = String(form.get("direction") || "above");
+          if (!symbol || !Number.isFinite(target)) return;
+
+          try {
+            await apiRequest("/api/alerts", "POST", { symbol, target, direction });
+            alertForm.reset();
+            alertStatus.textContent = `Aktienwecker fuer ${symbol} wurde erstellt.`;
+            await loadState();
+            await refreshQuotes();
+          } catch (error) {
+            alertStatus.textContent = error.message;
+          }
+        });
+
+        notificationButton?.addEventListener("click", async () => {
+          if (!("Notification" in window)) {
+            alertStatus.textContent = "Dieser Browser unterstuetzt keine Benachrichtigungen.";
+            return;
+          }
+
+          const permission = await Notification.requestPermission();
+          alertStatus.textContent = permission === "granted"
+            ? "Benachrichtigungen sind erlaubt."
+            : "Benachrichtigungen sind noch nicht erlaubt.";
+        });
+      }
+
+      async function loadState() {
+        appState = await fetchJson("/api/state");
+        if (!activeChartSymbol && appState.watchlist[0]) {
+          activeChartSymbol = appState.watchlist[0].symbol;
+        }
+        renderWatchlist();
+        renderAlerts();
+      }
+
+      async function refreshQuotes() {
+        const symbols = unique([
+          ...appState.watchlist.map((item) => item.symbol),
+          ...appState.alerts.map((item) => item.symbol),
+          ...currentMarketAssets().map((item) => item.symbol),
+          currentSearchSymbol,
+          activeChartSymbol
+        ]);
+
+        const data = await fetchJson(`/api/quotes?symbols=${symbols.join(",")}`);
+        latestQuotes = new Map(data.quotes.map((quote) => [quote.symbol, quote]));
+        updateApiStatus(data);
+        renderWatchlist();
+        renderMarketRows();
+        renderHeroStats();
+        if (currentSearchSymbol) renderSearchResult(currentSearchSymbol);
+        renderAlerts();
+        await checkAlerts();
+      }
+
+      function renderWatchlist() {
+        if (!watchlist) return;
+        if (watchlistCount) {
+          const count = appState.watchlist.length;
+          watchlistCount.textContent = count === 1 ? "1 Wert" : `${count} Werte`;
+        }
+
+        if (!appState.watchlist.length) {
+          watchlist.innerHTML = `<article class="watchlist-item"><div class="ticker-icon">+</div><div><h3 class="ticker-name">Noch leer</h3><p class="ticker-meta">Fuege unten dein erstes Symbol hinzu.</p></div><div class="ticker-price"><strong>-</strong><span>-</span></div></article>`;
+          return;
+        }
+
+        watchlist.innerHTML = appState.watchlist.map((item) => {
+          const quote = latestQuotes.get(item.symbol);
+          return `
+            <article class="watchlist-item" data-symbol="${escapeHtml(item.symbol)}" data-chart-symbol="${escapeHtml(item.symbol)}">
+              <div class="ticker-icon">${escapeHtml(item.symbol.slice(0, 2))}</div>
+              <div>
+                <h3 class="ticker-name">${escapeHtml(item.name || quote?.name || item.symbol)}</h3>
+                <p class="ticker-meta">${escapeHtml(item.symbol)} · ${escapeHtml(item.sector || quote?.sector || "Watchlist")}</p>
+                ${quote?.message ? `<p class="status-note">${escapeHtml(shortApiMessage(quote.message))}</p>` : ""}
+              </div>
+              <div class="ticker-price">
+                <strong>${quote?.available ? formatPrice(quote) : "Keine Daten"}</strong>
+                <span class="${quoteClass(quote)}">${formatChange(quote)}</span>
+                <button class="small-button remove-button" type="button" data-remove-watch="${escapeHtml(item.symbol)}">Entfernen</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        watchlist.querySelectorAll("[data-remove-watch]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            await apiRequest("/api/watchlist", "DELETE", { symbol: button.dataset.removeWatch });
+            await loadState();
+            await refreshQuotes();
+          });
+        });
+
+        watchlist.querySelectorAll("[data-chart-symbol]").forEach((item) => {
+          item.addEventListener("click", async (event) => {
+            if (event.target.closest("button")) return;
+            await selectChart(item.dataset.chartSymbol);
+          });
+        });
+      }
+
+      function renderHeroStats() {
+        if (!watchlistStatValue || !watchlistStatChange) return;
+
+        const count = appState.watchlist.length;
+        const quotes = appState.watchlist
+          .map((item) => latestQuotes.get(item.symbol))
+          .filter((item) => item?.available);
+        const strongMomentum = quotes.filter((item) => Number(item.changePercent) >= 1).length;
+
+        watchlistStatValue.textContent = count === 1 ? "1 Wert" : `${count} Werte`;
+        watchlistStatChange.textContent = strongMomentum === 1
+          ? "1 mit starkem Momentum"
+          : `${strongMomentum} mit starkem Momentum`;
+      }
+
+      function renderSearchResult(symbol) {
+        if (!searchResults || !symbol) return;
+        const quote = latestQuotes.get(symbol);
+        const asset = allKnownAssets().find((item) => item.symbol === symbol);
+        const alreadyInWatchlist = appState.watchlist.some((item) => item.symbol === symbol);
+        const title = quote?.name || asset?.name || symbol;
+        const sector = quote?.sector || asset?.sector || "Suchergebnis";
+
+        searchResults.innerHTML = `
+          <article class="watchlist-item" data-chart-symbol="${escapeHtml(symbol)}">
+            <div class="ticker-icon">${escapeHtml(symbol.slice(0, 2))}</div>
+            <div>
+              <h3 class="ticker-name">${escapeHtml(title)}</h3>
+              <p class="ticker-meta">${escapeHtml(symbol)} · ${escapeHtml(sector)}</p>
+              ${quote?.message ? `<p class="status-note">${escapeHtml(shortApiMessage(quote.message))}</p>` : ""}
+            </div>
+            <div class="ticker-price">
+              <strong>${quote?.available ? formatPrice(quote) : "Keine Daten"}</strong>
+              <span class="${quoteClass(quote)}">${formatChange(quote)}</span>
+              <div class="inline-actions">
+                <button class="small-button" type="button" data-search-watch="${escapeHtml(symbol)}">${alreadyInWatchlist ? "Schon in Watchlist" : "Zur Watchlist"}</button>
+                <button class="small-button" type="button" data-search-alert="${escapeHtml(symbol)}">Wecker setzen</button>
+              </div>
+            </div>
+          </article>
+        `;
+
+        const watchButton = searchResults.querySelector("[data-search-watch]");
+        watchButton?.addEventListener("click", async () => {
+          if (alreadyInWatchlist) return;
+          await addToWatchlist(symbol, title);
+          watchlistStatus.textContent = `${symbol} wurde zur Watchlist hinzugefuegt.`;
+        });
+
+        searchResults.querySelector("[data-search-alert]")?.addEventListener("click", () => {
+          document.querySelector("#alert-symbol").value = symbol;
+          document.querySelector("#alert-target").focus();
+          document.querySelector("#alert-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        searchResults.querySelector("[data-chart-symbol]")?.addEventListener("click", async (event) => {
+          if (event.target.closest("button")) return;
+          await selectChart(symbol);
+        });
+      }
+
+      function renderMarketRows() {
+        if (!marketTable) return;
+        const rows = currentMarketAssets().map((asset) => {
+          const quote = latestQuotes.get(asset.symbol);
+          const name = quote?.name || asset.name;
+          const sector = quote?.sector || asset.sector;
+          return `
+            <div class="market-row" data-symbol="${escapeHtml(asset.symbol)}" data-chart-symbol="${escapeHtml(asset.symbol)}">
+              <div class="asset">
+                <strong>${escapeHtml(name)}</strong>
+                <span>${escapeHtml(asset.symbol)} · ${escapeHtml(sector)}</span>
+              </div>
+              <div class="cell"><strong>${quote?.available ? formatPrice(quote) : "Keine Daten"}</strong></div>
+              <div class="cell ${quoteClass(quote)}">${formatChange(quote)}</div>
+              <div class="cell hide-mobile">${escapeHtml(quote?.volume || "-")}</div>
+              <div class="cell hide-tablet hide-mobile">${escapeHtml(asset.marketCap || "-")}</div>
+            </div>
+          `;
+        }).join("");
+
+        marketTable.innerHTML = `
+          <div class="market-row header">
+            <div>Wert</div>
+            <div class="cell">Kurs</div>
+            <div class="cell">1 Tag</div>
+            <div class="cell hide-mobile">Volumen</div>
+            <div class="cell hide-tablet hide-mobile">Marktkap.</div>
+          </div>
+          ${rows}
+        `;
+
+        marketTable.querySelectorAll("[data-chart-symbol]").forEach((row) => {
+          row.addEventListener("click", async () => {
+            await selectChart(row.dataset.chartSymbol);
+          });
+        });
+      }
+
+      function renderAlerts() {
+        if (!alertsList) return;
+        const activeCount = appState.alerts.filter((alertItem) => alertItem.active).length;
+        if (alertsCount) alertsCount.textContent = `${activeCount} aktiv`;
+
+        if (!appState.alerts.length) {
+          alertsList.innerHTML = `<article class="alert-item"><h3>Noch kein Aktienwecker</h3><p>Erstelle unten deinen ersten Zielkurs.</p></article>`;
+          return;
+        }
+
+        alertsList.innerHTML = appState.alerts.map((alertItem) => {
+          const quote = latestQuotes.get(alertItem.symbol);
+          const directionText = alertItem.direction === "below" ? "unter" : "ueber";
+          const stateText = alertItem.triggered ? "Ausgeloest" : alertItem.active ? "Aktiv" : "Pausiert";
+          return `
+            <article class="alert-item">
+              <h3>${escapeHtml(alertItem.symbol)} ${directionText} ${formatNumber(alertItem.target)} ${quote?.currency || ""}</h3>
+              <p>Aktueller Kurs: ${quote?.available ? formatPrice(quote) : "Keine Daten"} · ${stateText}</p>
+              <div class="inline-actions">
+                <button class="small-button" type="button" data-toggle-alert="${escapeHtml(alertItem.id)}">${alertItem.active ? "Pausieren" : "Aktivieren"}</button>
+                <button class="small-button remove-button" type="button" data-remove-alert="${escapeHtml(alertItem.id)}">Loeschen</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        alertsList.querySelectorAll("[data-toggle-alert]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            const alertItem = appState.alerts.find((item) => item.id === button.dataset.toggleAlert);
+            await apiRequest("/api/alerts", "PATCH", { id: button.dataset.toggleAlert, active: !alertItem.active, triggered: false });
+            await loadState();
+            await refreshQuotes();
+          });
+        });
+
+        alertsList.querySelectorAll("[data-remove-alert]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            await apiRequest("/api/alerts", "DELETE", { id: button.dataset.removeAlert });
+            await loadState();
+            await refreshQuotes();
+          });
+        });
+      }
+
+      async function checkAlerts() {
+        for (const alertItem of appState.alerts) {
+          const quote = latestQuotes.get(alertItem.symbol);
+          if (!alertItem.active || alertItem.triggered || !quote?.available) continue;
+
+          const hit = alertItem.direction === "below"
+            ? quote.price <= alertItem.target
+            : quote.price >= alertItem.target;
+
+          if (!hit) continue;
+          await apiRequest("/api/alerts", "PATCH", { id: alertItem.id, triggered: true });
+          sendBrowserNotification(alertItem, quote);
+          alertStatus.textContent = `${alertItem.symbol} hat deinen Zielkurs erreicht.`;
+        }
+
+        appState = await fetchJson("/api/state");
+        renderAlerts();
+      }
+
+      function sendBrowserNotification(alertItem, quote) {
+        const title = `MonetaKngdm: ${alertItem.symbol}`;
+        const body = `Aktueller Kurs: ${formatPrice(quote)}. Zielkurs: ${formatNumber(alertItem.target)}.`;
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(title, { body });
+        } else {
+          alert(`${title}\n${body}`);
+        }
+      }
+
+      async function selectChart(symbol) {
+        activeChartSymbol = symbol;
+        await loadChart();
+        document.querySelector("#chart-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      async function loadChart() {
+        if (!chartArea || !activeChartSymbol) return;
+
+        chartArea.innerHTML = `<div class="chart-empty">Chart wird geladen...</div>`;
+        const data = await fetchJson(`/api/history?symbol=${encodeURIComponent(activeChartSymbol)}&range=${activeChartRange}`);
+
+        if (!data.available) {
+          chartTitle.textContent = `${data.name || activeChartSymbol} Chart`;
+          chartArea.innerHTML = `<div class="chart-empty">${escapeHtml(data.message || "Keine Chart-Daten gefunden.")}</div>`;
+          chartStatus.textContent = "Fuer sehr neue oder kleine Aktien gibt es manchmal noch keinen Kursverlauf bei der Datenquelle.";
+          return;
+        }
+
+        chartTitle.textContent = `${data.name} (${data.symbol})`;
+        chartStatus.textContent = `${data.points.length} Datenpunkte · Quelle: Yahoo Finance · Zeitraum: ${activeChartRange}`;
+        chartArea.innerHTML = renderLineChart(data.points, data.currency);
+      }
+
+      function renderLineChart(points, currency) {
+        const width = 900;
+        const height = 280;
+        const padding = 34;
+        const values = points.map((point) => point.close);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        const coordinates = points.map((point, index) => {
+          const x = padding + (index / Math.max(points.length - 1, 1)) * (width - padding * 2);
+          const y = height - padding - ((point.close - min) / range) * (height - padding * 2);
+          return { x, y, point };
+        });
+
+        const line = coordinates.map((item) => `${item.x.toFixed(1)},${item.y.toFixed(1)}`).join(" ");
+        const first = points[0];
+        const last = points[points.length - 1];
+        const positive = last.close >= first.close;
+        const stroke = positive ? "var(--positive)" : "var(--negative)";
+
+        return `
+          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Kurschart">
+            <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="rgba(191,229,255,0.14)" />
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(191,229,255,0.14)" />
+            <text x="${padding}" y="22" fill="var(--text-muted)" font-size="13">${formatNumber(max)} ${currency}</text>
+            <text x="${padding}" y="${height - 8}" fill="var(--text-muted)" font-size="13">${formatNumber(min)} ${currency}</text>
+            <polyline points="${line}" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="${coordinates.at(-1).x.toFixed(1)}" cy="${coordinates.at(-1).y.toFixed(1)}" r="5" fill="${stroke}" />
+            <text x="${width - padding}" y="24" text-anchor="end" fill="var(--text-main)" font-size="14">${formatNumber(last.close)} ${currency}</text>
+            <text x="${padding}" y="${height - 12}" fill="var(--text-muted)" font-size="12">${escapeHtml(first.date)}</text>
+            <text x="${width - padding}" y="${height - 12}" text-anchor="end" fill="var(--text-muted)" font-size="12">${escapeHtml(last.date)}</text>
+          </svg>
+        `;
+      }
+
+      async function loadNewsFromBackend() {
+        const data = await fetchJson("/api/news");
+        const newsList = document.querySelector(".news-list");
+        if (!newsList || !Array.isArray(data.news)) return;
+
+        newsList.innerHTML = data.news.map((item) => `
+          <article class="news-item">
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.summary)}</p>
+            <div class="meta-line">
+              <span>${escapeHtml(item.time)}</span>
+              <span>${escapeHtml(item.category)}</span>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      function updateApiStatus(data) {
+        if (!apiStatus) return;
+        const liveCount = data.quotes.filter((quote) => quote.source === "alpha-vantage" || quote.source === "stooq" || quote.source === "yahoo").length;
+        const demoCount = data.quotes.filter((quote) => quote.source === "demo").length;
+
+        if (liveCount) {
+          apiStatus.textContent = `Live-Daten: ${liveCount} Kurse`;
+        } else if (demoCount) {
+          apiStatus.textContent = `Demo-Daten: ${demoCount} Kurse`;
+        } else if (data.apiKeyFound) {
+          apiStatus.textContent = "Keine Kursdaten gefunden";
+        } else {
+          apiStatus.textContent = "API-Key fehlt";
+        }
+      }
+
+      async function fetchJson(url) {
+        const response = await fetch(url);
+        return response.json();
+      }
+
+      async function apiRequest(url, method, body) {
+        const response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Anfrage fehlgeschlagen");
+        return data;
+      }
+
+      async function addToWatchlist(symbol, name) {
+        await apiRequest("/api/watchlist", "POST", { symbol, name });
+        await loadState();
+        await refreshQuotes();
+      }
+
+      function currentMarketAssets() {
+        return marketSets[activeMarketFilter] || marketSets.stocks;
+      }
+
+      function allKnownAssets() {
+        const watchlistAssets = appState.watchlist.map((item) => ({
+          symbol: item.symbol,
+          name: item.name,
+          sector: item.sector
+        }));
+
+        return uniqueBySymbol([
+          ...watchlistAssets,
+          ...marketSets.stocks,
+          ...marketSets.indices,
+          ...marketSets.etfs,
+          { symbol: "AAPL", name: "Apple", sector: "Technologie" },
+          { symbol: "NVDA", name: "NVIDIA", sector: "Halbleiter" },
+          { symbol: "TSLA", name: "Tesla", sector: "Automobil" },
+          { symbol: "Y0N", name: "Redwood AI", sector: "KI/Chemie" },
+          { symbol: "AIRX", name: "Redwood AI", sector: "KI/Chemie" },
+          { symbol: "RDWCF", name: "Redwood AI", sector: "KI/Chemie" },
+          { symbol: "A422EZ", name: "Redwood AI", sector: "KI/Chemie" }
+        ]);
+      }
+
+      function findSearchSymbol(query) {
+        const cleanQuery = query.trim().toUpperCase();
+        const match = allKnownAssets().find((item) => {
+          const name = String(item.name || "").toUpperCase();
+          return item.symbol === cleanQuery || name === cleanQuery || name.includes(cleanQuery);
+        });
+
+        return normalizeInputSymbol(match?.symbol || cleanQuery.replace(/[^A-Z0-9.-]/g, ""));
+      }
+
+      function normalizeInputSymbol(symbol) {
+        const cleanSymbol = String(symbol || "").toUpperCase().replace(/[^A-Z0-9.-]/g, "");
+        const aliases = {
+          A422EZ: "Y0N",
+          REDWOODAI: "Y0N",
+          "REDWOOD-AI": "Y0N"
+        };
+        return aliases[cleanSymbol] || cleanSymbol;
+      }
+
+      function unique(values) {
+        return [...new Set(values.filter(Boolean))];
+      }
+
+      function uniqueBySymbol(items) {
+        const seen = new Set();
+        return items.filter((item) => {
+          if (!item.symbol || seen.has(item.symbol)) return false;
+          seen.add(item.symbol);
+          return true;
+        });
+      }
+
+      function quoteClass(quote) {
+        return Number(quote?.changePercent) >= 0 ? "positive" : "negative";
+      }
+
+      function formatChange(quote) {
+        if (!quote?.available) return "-";
+        return `${Number(quote.changePercent) >= 0 ? "+" : ""}${formatNumber(quote.changePercent)} %`;
+      }
+
+      function formatPrice(quote) {
+        const price = formatNumber(quote.price);
+        return quote.currency === "EUR" ? `${price} EUR` : `${price} $`;
+      }
+
+      function formatNumber(value) {
+        return Number(value).toLocaleString("de-DE", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function shortApiMessage(message) {
+        const text = String(message);
+        if (text.includes("rate limit") || text.includes("frequency")) {
+          return "API-Limit erreicht. Bitte kurz warten.";
+        }
+        if (text.length > 120) return `${text.slice(0, 120)}...`;
+        return text;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    })();
+  </script>
 </body>
 </html>
